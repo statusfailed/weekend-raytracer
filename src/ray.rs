@@ -15,11 +15,15 @@ impl Ray {
         }
     }
 
-    fn origin(&self) -> Point {
+    pub fn origin(&self) -> Point {
         return self.a;
     }
 
-    fn point_at_parameter(&self, t: f64) -> Point {
+    pub fn direction(&self) -> Point {
+        return self.b;
+    }
+
+    pub fn point_at_parameter(&self, t: f64) -> Point {
         return self.a + t * self.b;
     }
 }
