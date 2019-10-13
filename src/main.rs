@@ -11,7 +11,23 @@ fn write_test_image() {
     image::write_ascii(img);
 }
 
+// does the ray r intersect the sphere centered at "center" with radius "radius"?
+fn hit_sphere(center: &Vector3<f64>, radius: f64, r: &Ray) -> bool {
+    let oc = Vector3::new(0., 0., 0.) - center;
+    let dir = r.direction();
+    let a = dir.dot(&dir);
+    let b = 2.0 * oc.dot(&dir);
+    let c = oc.dot(&oc) - radius * radius;
+    let discriminant = b*b - 4.*a*c;
+    return discriminant > 0.;
+}
+
 fn color(r: &Ray) -> Vector3<f64> {
+    // if the ray intersects the sphere, show red.
+    if hit_sphere(&Vector3::new(0., 0., -1.), 0.5, r) {
+        return Vector3::new(1., 0., 0.);
+    }
+
     let unit_direction: Vector3<f64> = r.direction().normalize();
     let t: f64 = 0.5 * (unit_direction.y + 1.0);
     return (1.0 - t) * Vector3::new(1.0, 1.0, 1.0)
