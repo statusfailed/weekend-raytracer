@@ -3,35 +3,33 @@ use na::{Vector3};
 
 mod image;
 mod ray;
+mod scene;
 
 use ray::{Point, Ray};
+use scene::{Hittable, HitRecord, Sphere};
+use std::f64;
 
 fn write_test_image() {
     let img = image::test_image();
     image::write_ascii(img);
 }
 
-// does the ray r intersect the sphere centered at "center" with radius "radius"?
-fn hit_sphere(center: &Vector3<f64>, radius: f64, r: &Ray) -> bool {
-    let oc = Vector3::new(0., 0., 0.) - center;
-    let dir = r.direction();
-    let a = dir.dot(&dir);
-    let b = 2.0 * oc.dot(&dir);
-    let c = oc.dot(&oc) - radius * radius;
-    let discriminant = b*b - 4.*a*c;
-    return discriminant > 0.;
-}
-
-fn color(r: &Ray) -> Vector3<f64> {
+fn color<T: Hittable>(r: &Ray, world: &T) -> Vector3<f64> {
     // if the ray intersects the sphere, show red.
-    if hit_sphere(&Vector3::new(0., 0., -1.), 0.5, r) {
-        return Vector3::new(1., 0., 0.);
+    match world.hit(r, 0.0, f64::MAX) {
+        Some(hit) => {
+            return 0.5 * Vector3::new(
+                hit.normal.x + 1., hit.normal.y + 1., hit.normal.z + 1.);
+        },
+        None => {
+            let unit_direction: Vector3<f64> = r.direction().normalize();
+            let t = 0.5 * (unit_direction.y + 1.0);
+            return (1.0 - t) * Vector3::new(1.0, 1.0, 1.0)
+                 + t * Vector3::new(0.5, 0.7, 1.0);
+        },
     }
 
-    let unit_direction: Vector3<f64> = r.direction().normalize();
-    let t: f64 = 0.5 * (unit_direction.y + 1.0);
-    return (1.0 - t) * Vector3::new(1.0, 1.0, 1.0)
-         + t * Vector3::new(0.5, 0.7, 1.0);
+
 }
 
 fn scene() -> image::P3 {
@@ -44,13 +42,21 @@ fn scene() -> image::P3 {
     let vertical = Vector3::new(0., 2., 0.);
     let origin = Vector3::new(0., 0., 0.);
 
+    //let world = Sphere { center: Vector3::new(0., 0., -1.), radius: 0.5 };
+    let world = vec![
+        Sphere { center: Vector3::new(0., 0., -1.), radius: 0.5 },
+        Sphere { center: Vector3::new(0., -100.5, -1.), radius: 100. },
+    ];
+
     for j in (0..ny).rev() {
         for i in 0..nx {
             let u = i as f64 / nx as f64;
             let v = j as f64 / ny as f64;
             let r = Ray::new(
                 origin, lower_left_corner + u * horizontal + v * vertical);
-            let col = color(&r);
+
+            let p = r.point_at_parameter(2.0);
+            let col = color(&r, &world);
 
             let ir = (255.99 * col.x) as u8;
             let ig = (255.99 * col.y) as u8;
