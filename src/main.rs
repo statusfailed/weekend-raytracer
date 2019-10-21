@@ -8,7 +8,7 @@ mod ray;
 mod scene;
 mod camera;
 
-use ray::{Point, Ray};
+use ray::{Point, V3, Ray};
 use scene::{Hittable, HitRecord, Sphere};
 use std::f64;
 use camera::{Camera};
@@ -20,27 +20,54 @@ fn random_double() -> f64 {
     val
 }
 
+// rejection sample a point inside the unit sphere.
+fn random_in_unit_sphere() -> V3 {
+    let mut p: Vector3<f64> = Vector3::new(0., 0., 0.);
+    // ehehehh https://www.reddit.com/r/rust/comments/1v9rgp/rust_has_dowhile_loops/
+    while {
+        // take a random point inside the unit box
+        p = 2.0 * Vector3::new(random_double(), random_double(), random_double()) -
+            Vector3::new(1., 1., 1.);
+        // accept it as long as it's inside the sphere.
+        p.norm_squared() >= 1.0
+    } { };
+    p
+}
+
 fn write_test_image() {
     let img = image::test_image();
     image::write_ascii(img);
 }
 
+// color of the background for a given ray.
+fn background(r: &Ray) -> Vector3<f64> {
+    let unit_direction: Vector3<f64> = r.direction().normalize();
+    let t = 0.5 * (unit_direction.y + 1.0);
+    (1.0 - t) * Vector3::new(1.0, 1.0, 1.0) + t * Vector3::new(0.5, 0.7, 1.0)
+}
+
 fn color<T: Hittable>(r: &Ray, world: &T) -> Vector3<f64> {
-    // if the ray intersects the sphere, show red.
-    match world.hit(r, 0.0, f64::MAX) {
-        Some(hit) => {
-            return 0.5 * Vector3::new(
-                hit.normal.x + 1., hit.normal.y + 1., hit.normal.z + 1.);
-        },
-        None => {
-            let unit_direction: Vector3<f64> = r.direction().normalize();
-            let t = 0.5 * (unit_direction.y + 1.0);
-            return (1.0 - t) * Vector3::new(1.0, 1.0, 1.0)
-                 + t * Vector3::new(0.5, 0.7, 1.0);
-        },
-    }
+    let steps: usize = 0;
+    let mut intensity: f64 = 1.0;
+    let mut current_ray: Ray = Ray::new(r.a, r.b);
+    let mut ret: Vector3<f64> = Vector3::new(0., 0., 0.);
 
+    while true {
+        match world.hit(&current_ray, 0.001, f64::MAX) {
+            Some(hit) => {
+                let target: V3 = hit.p + hit.normal + random_in_unit_sphere();
+                current_ray = Ray::new(hit.p, target - hit.p);
+                intensity /= 2.0;
+                // return 0.5 * color(&Ray::new(hit.p, target - hit.p), world);
+            },
+            None => {
+                ret = intensity * background(r);
+                break;
+            },
+        }
+    };
 
+    return ret;
 }
 
 fn scene() -> image::P3 {
@@ -74,9 +101,9 @@ fn scene() -> image::P3 {
 
             col /= (ns as f64);
 
-            let ir = (255.99 * col.x) as u8;
-            let ig = (255.99 * col.y) as u8;
-            let ib = (255.99 * col.z) as u8;
+            let ir = (255.99 * col.x.sqrt()) as u8;
+            let ig = (255.99 * col.y.sqrt()) as u8;
+            let ib = (255.99 * col.z.sqrt()) as u8;
 
             data.push((ir, ig, ib));
         }
