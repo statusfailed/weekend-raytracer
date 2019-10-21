@@ -1,6 +1,7 @@
 use na::{Vector3};
 
 pub type Point = Vector3<f64>;
+pub type V3 = Vector3<f64>;
 
 pub struct Ray {
     a: Point,

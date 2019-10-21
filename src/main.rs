@@ -1,13 +1,24 @@
 extern crate nalgebra as na;
+extern crate rand;
+
 use na::{Vector3};
 
 mod image;
 mod ray;
 mod scene;
+mod camera;
 
 use ray::{Point, Ray};
 use scene::{Hittable, HitRecord, Sphere};
 use std::f64;
+use camera::{Camera};
+use rand::{random, Open01};
+
+// here to keep things similar to tutorial
+fn random_double() -> f64 {
+    let Open01(val) = random::<Open01<f64>>();
+    val
+}
 
 fn write_test_image() {
     let img = image::test_image();
@@ -35,6 +46,7 @@ fn color<T: Hittable>(r: &Ray, world: &T) -> Vector3<f64> {
 fn scene() -> image::P3 {
     let nx: usize = 400;
     let ny: usize = 200;
+    let ns: usize = 100;
     let mut data = Vec::with_capacity(nx * ny);
 
     let lower_left_corner = Vector3::new(-2., -1., -1.);
@@ -48,15 +60,19 @@ fn scene() -> image::P3 {
         Sphere { center: Vector3::new(0., -100.5, -1.), radius: 100. },
     ];
 
+    let cam: Camera = Camera::default();
+
     for j in (0..ny).rev() {
         for i in 0..nx {
-            let u = i as f64 / nx as f64;
-            let v = j as f64 / ny as f64;
-            let r = Ray::new(
-                origin, lower_left_corner + u * horizontal + v * vertical);
+            let mut col: Vector3<f64> = Vector3::new(0., 0., 0.);
+            for s in 0..ns {
+                let u: f64 = ((i as f64) + random_double()) / (nx as f64);
+                let v: f64 = ((j as f64) + random_double()) / (ny as f64);
+                let r: Ray = cam.get_ray(u, v);
+                col += color(&r, &world);
+            }
 
-            let p = r.point_at_parameter(2.0);
-            let col = color(&r, &world);
+            col /= (ns as f64);
 
             let ir = (255.99 * col.x) as u8;
             let ig = (255.99 * col.y) as u8;
