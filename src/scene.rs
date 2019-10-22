@@ -35,12 +35,15 @@ pub struct Sphere<'a> {
 
 impl Hittable for Sphere<'_> {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+        // solving the quadratic for t- does p(t) ever hit the sphere.
         let oc = r.origin() - self.center;
         let dir = r.direction();
+        // quadratic coefficients
         let a = dir.dot(&dir);
         let b = oc.dot(&dir);
         let c = oc.dot(&oc) - (self.radius * self.radius);
 
+        // b^2 - 4ac, with redundant 2s removed.
         let discriminant = b*b - a*c;
 
         // TODO: tidy this repeated code
