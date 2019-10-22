@@ -15,7 +15,7 @@ use ray::{V3, Ray};
 use scene::{Hittable, Sphere, Material, Scatter};
 use std::f64;
 use camera::{Camera};
-use random::{random_in_unit_sphere, random_double};
+use random::{random_double};
 use materials::{lambertian, metal};
 
 fn write_test_image() {
@@ -44,8 +44,10 @@ fn color<T: Hittable>(r: &Ray, world: &T, mut depth: usize) -> Vector3<f64> {
                 match (hit.material)(&current_ray, &hit) {
                     // absorbed: no light, returrn zero color.
                     None => return V3::new(0., 0., 0.),
+
                     // scattered: multiply attenuation accumulator and continue.
                     Some(Scatter { ray, attenuation }) => {
+                        // multiply-accumulate each component
                         attenuation_acc.component_mul_assign(&attenuation);
                         current_ray = ray;
                     },
@@ -69,12 +71,21 @@ fn scene() -> image::P3 {
     let max_depth: usize = 50;
     let mut data = Vec::with_capacity(nx * ny);
 
-    let mat: Material = lambertian(V3::new(0.8, 0.3, 0.3));
-    let mat2: Material = metal(V3::new(0.3, 0.3, 0.8));
+    let lam1: Material = lambertian(V3::new(0.8, 0.3, 0.3));
+    let lam2: Material = lambertian(V3::new(0.8, 0.8, 0.0));
+    let met1: Material = metal(V3::new(0.8, 0.6, 0.2), 0.3);
+    let met2: Material = metal(V3::new(0.8, 0.8, 0.8), 1.0);
 
     let world = vec![
-        Sphere { center: Vector3::new(0., 0., -1.), radius: 0.5, material: &mat2},
-        Sphere { center: Vector3::new(0., -100.5, -1.), radius: 100., material: &mat},
+        // center
+        Sphere { center: Vector3::new(0., 0., -1.), radius: 0.5, material: &lam1},
+
+        // the "floor"
+        Sphere { center: Vector3::new(0., -100.5, -1.), radius: 100., material: &lam2},
+
+        // metal side spheres
+        Sphere { center: Vector3::new(1., 0., -1.), radius: 0.5, material: &met1},
+        Sphere { center: Vector3::new(-1., 0., -1.), radius: 0.5, material: &met2},
     ];
 
     let cam: Camera = Camera::default();

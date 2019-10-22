@@ -1,7 +1,6 @@
 use std::vec::{Vec};
 use std::option::{Option};
 use crate::ray::{Ray, Point, V3};
-use na::{Vector3};
 
 // NOTE: we're different to the tutorial here; C++ uses an abstract class, but we just use a
 // function instead.
@@ -36,7 +35,7 @@ pub struct Sphere<'a> {
 
 impl Hittable for Sphere<'_> {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
-        let oc = Vector3::new(0., 0., 0.) - self.center;
+        let oc = r.origin() - self.center;
         let dir = r.direction();
         let a = dir.dot(&dir);
         let b = oc.dot(&dir);

@@ -20,11 +20,18 @@ pub fn reflect(incident: &V3, normal: &V3) -> V3 {
     return incident - 2.0 * incident.dot(normal) * normal;
 }
 
-pub fn metal(albedo: V3) -> Material {
+pub fn metal(albedo: V3, mut fuzz: f64) -> Material {
+    fuzz = fuzz.min(1.0); // cap at 1.0
     Box::new(move |ray: &Ray, hit: &HitRecord| {
-        Some(Scatter {
-            ray: Ray::new(hit.p, reflect(&ray.direction().normalize(), &hit.normal)),
-            attenuation: albedo,
-        })
+        let reflected = reflect(&ray.direction().normalize(), &hit.normal);
+        let scattered = Ray::new(hit.p, reflected + fuzz*random_in_unit_sphere());
+        if scattered.direction().dot(&hit.normal) > 0.0 {
+            Some(Scatter {
+                ray: scattered,
+                attenuation: albedo,
+            })
+        } else {
+            None
+        }
     })
 }
