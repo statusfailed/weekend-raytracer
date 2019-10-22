@@ -16,7 +16,7 @@ use scene::{Hittable, Sphere, Material, Scatter};
 use std::f64;
 use camera::{Camera};
 use random::{random_double};
-use materials::{lambertian, metal};
+use materials::{lambertian, metal, dielectric};
 
 fn write_test_image() {
     let img = image::test_image();
@@ -74,7 +74,7 @@ fn scene() -> image::P3 {
     let lam1: Material = lambertian(V3::new(0.8, 0.3, 0.3));
     let lam2: Material = lambertian(V3::new(0.8, 0.8, 0.0));
     let met1: Material = metal(V3::new(0.8, 0.6, 0.2), 0.3);
-    let met2: Material = metal(V3::new(0.8, 0.8, 0.8), 1.0);
+    let die1: Material = dielectric(1.5);
 
     let world = vec![
         // center
@@ -85,7 +85,7 @@ fn scene() -> image::P3 {
 
         // metal side spheres
         Sphere { center: Vector3::new(1., 0., -1.), radius: 0.5, material: &met1},
-        Sphere { center: Vector3::new(-1., 0., -1.), radius: 0.5, material: &met2},
+        Sphere { center: Vector3::new(-1., 0., -1.), radius: 0.5, material: &die1},
     ];
 
     let cam: Camera = Camera::default();
