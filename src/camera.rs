@@ -1,5 +1,3 @@
-use std::vec::{Vec};
-use std::option::{Option};
 use crate::ray::{Ray, Point, V3};
 use na::{Vector3};
 
