@@ -83,9 +83,12 @@ fn scene() -> image::P3 {
         // the "floor"
         Sphere { center: Vector3::new(0., -100.5, -1.), radius: 100., material: &lam2},
 
-        // metal side spheres
+        // RHS metal sphere
         Sphere { center: Vector3::new(1., 0., -1.), radius: 0.5, material: &met1},
+
+        // hollow glass sphere
         Sphere { center: Vector3::new(-1., 0., -1.), radius: 0.5, material: &die1},
+        Sphere { center: Vector3::new(-1., 0., -1.), radius: -0.45, material: &die1},
     ];
 
     let cam: Camera = Camera::default();
