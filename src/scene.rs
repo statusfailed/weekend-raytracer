@@ -27,13 +27,13 @@ pub trait Hittable {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 
-pub struct Sphere<'a> {
+pub struct Sphere {
     pub center: Point,
     pub radius: f64,
-    pub material: &'a Material,
+    pub material: Material,
 }
 
-impl Hittable for Sphere<'_> {
+impl Hittable for Sphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         // solving the quadratic for t- does p(t) ever hit the sphere.
         let oc = r.origin() - self.center;
@@ -55,7 +55,7 @@ impl Hittable for Sphere<'_> {
                     t: temp,
                     p: p,
                     normal: (p - self.center) / self.radius,
-                    material: self.material,
+                    material: &self.material,
                 });
             }
 
@@ -67,7 +67,7 @@ impl Hittable for Sphere<'_> {
                     t: temp,
                     p: p,
                     normal: (p - self.center) / self.radius,
-                    material: self.material,
+                    material: &self.material,
                 });
             }
         }
@@ -76,7 +76,7 @@ impl Hittable for Sphere<'_> {
     }
 }
 
-impl Hittable for Vec<Sphere<'_>> {
+impl Hittable for Vec<Sphere> {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut acc: Option<HitRecord> = None;
 

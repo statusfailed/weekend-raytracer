@@ -1,5 +1,4 @@
 use crate::ray::{Ray, Point, V3};
-use na::{Vector3};
 use std::f64::consts::PI;
 use crate::random::{random_double};
 
