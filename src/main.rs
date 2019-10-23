@@ -92,13 +92,16 @@ fn scene() -> image::P3 {
          Sphere { center: Vector3::new(-1., 0., -1.), radius: -0.45, material: &die1},
      ];
 
-    let cam: Camera = Camera::new(
-        V3::new(-2.0, 2.0, 1.0),
-        V3::new(0.0, 0.0, -1.0),
-        V3::new(0.0, 1.0, 0.0),
-        30.0,
-        nx as f64 / ny as f64
-    );
+    let lookfrom = V3::new(3.0, 3.0, 2.0);
+    let lookat = V3::new(0.0, 0.0, -1.0);
+    let vup = V3::new(0.0, 1.0, 0.0);
+    let dist_to_focus = (lookfrom - lookat).magnitude();
+    let aperture = 2.0;
+
+    let cam: Camera = Camera::new(lookfrom, lookat, vup, 20.0,
+                                  nx as f64 / ny as f64,
+                                  aperture,
+                                  dist_to_focus);
 
     for j in (0..ny).rev() {
         for i in 0..nx {
