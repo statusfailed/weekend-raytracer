@@ -19,16 +19,22 @@ impl Camera {
         }
     }
 
-    pub fn from_fov_aspect(vfov: f64, aspect: f64) -> Camera {
+    pub fn new(lookfrom: V3, lookat: V3, vup: V3, vfov: f64, aspect: f64) -> Camera {
         let theta: f64 = vfov * PI / 180.0; // convert from degrees to radians
         let half_height = (theta / 2.0).tan();
         let half_width = aspect * half_height;
 
+        let w: V3 = (lookfrom - lookat).normalize();
+        let u: V3 = vup.cross(&w).normalize();
+        let v: V3 = w.cross(&u);
+
+        let origin: V3 = lookfrom;
+
         Camera {
-            lower_left_corner: V3::new(-half_width, -half_height, -1.0),
-            horizontal: V3::new(2.0 * half_width, 0.0, 0.0),
-            vertical: V3::new(0.0, 2.0 * half_height, 0.0),
-            origin: V3::new(0.0, 0.0, 0.0),
+            lower_left_corner: origin - half_width * u - half_height * v - w,
+            horizontal: 2.0 * half_width * u,
+            vertical: 2.0 * half_height * v,
+            origin: origin,
         }
     }
 
