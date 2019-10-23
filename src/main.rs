@@ -76,22 +76,27 @@ fn scene() -> image::P3 {
     let met1: Material = metal(V3::new(0.8, 0.6, 0.2), 0.3);
     let die1: Material = dielectric(1.5);
 
+    let R = (std::f64::consts::PI / 4.0).cos();
     let world = vec![
-        // center
-        Sphere { center: Vector3::new(0., 0., -1.), radius: 0.5, material: &lam1},
-
-        // the "floor"
-        Sphere { center: Vector3::new(0., -100.5, -1.), radius: 100., material: &lam2},
-
-        // RHS metal sphere
-        Sphere { center: Vector3::new(1., 0., -1.), radius: 0.5, material: &met1},
-
-        // hollow glass sphere
-        Sphere { center: Vector3::new(-1., 0., -1.), radius: 0.5, material: &die1},
-        Sphere { center: Vector3::new(-1., 0., -1.), radius: -0.45, material: &die1},
+        Sphere { center: V3::new(-R, 0., -1.), radius: R, material: &lam1 },
+        Sphere { center: V3::new( R, 0., -1.), radius: R, material: &met1 },
     ];
-
-    let cam: Camera = Camera::default();
+//         // center
+//         Sphere { center: Vector3::new(0., 0., -1.), radius: 0.5, material: &lam1},
+//
+//         // the "floor"
+//         Sphere { center: Vector3::new(0., -100.5, -1.), radius: 100., material: &lam2},
+//
+//         // RHS metal sphere
+//         Sphere { center: Vector3::new(1., 0., -1.), radius: 0.5, material: &met1},
+//
+//         // hollow glass sphere
+//         Sphere { center: Vector3::new(-1., 0., -1.), radius: 0.5, material: &die1},
+//         Sphere { center: Vector3::new(-1., 0., -1.), radius: -0.45, material: &die1},
+//     ];
+//
+//    let cam: Camera = Camera::default();
+    let cam: Camera = Camera::from_fov_aspect(90.0, nx as f64 / ny as f64);
 
     for j in (0..ny).rev() {
         for i in 0..nx {
